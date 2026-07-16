@@ -20,7 +20,7 @@
 
 @font-face {
   font-family: "MP-B";
-  src: url("./MP-B.ttf?v=20260705f") format("truetype");
+  src: url("./MP-B.ttf?v=20260705h") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -63,8 +63,8 @@ body {
 
 #locationDay {
   position: absolute;
-  left: 280px;
-  top: 188px;
+  left: 288px;
+  top: 166px;
   display: grid;
   grid-template-columns: repeat(3, 170px);
   grid-template-rows: repeat(2, 220px);
@@ -74,8 +74,8 @@ body {
 
 #clock {
   position: absolute;
-  left: 980px;
-  top: 188px;
+  left: 988px;
+  top: 166px;
   height: 470px;
   display: flex;
   align-items: stretch;
@@ -186,6 +186,24 @@ body {
   bottom: 0;
 }
 
+/* Darker moving flap overlay so the descending top flap reads deeper during the flip. */
+.flip-half::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.flip-half.top-flip::after {
+  background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.28));
+  opacity: 0.10;
+}
+
+.flip-half.bottom-flip::after {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.10));
+  opacity: 0.08;
+}
+
 .panel span,
 .flip-half span {
   position: absolute;
@@ -247,8 +265,17 @@ body {
   animation: flipTop var(--flip-half-ms) cubic-bezier(0.38, 0.01, 0.22, 1) forwards;
 }
 
+.flap.flipping .top-flip::after {
+  animation: topShade var(--flip-half-ms) linear forwards;
+}
+
 .flap.flipping .bottom-flip {
   animation: flipBottom var(--flip-half-ms) cubic-bezier(0.16, 0.88, 0.24, 1) forwards;
+  animation-delay: var(--flip-half-ms);
+}
+
+.flap.flipping .bottom-flip::after {
+  animation: bottomShade var(--flip-half-ms) linear forwards;
   animation-delay: var(--flip-half-ms);
 }
 
@@ -260,6 +287,16 @@ body {
 @keyframes flipBottom {
   0% { transform: rotateX(90deg); filter: brightness(0.82); }
   100% { transform: rotateX(0deg); filter: brightness(1); }
+}
+
+@keyframes topShade {
+  0% { opacity: 0.10; }
+  100% { opacity: 0.42; }
+}
+
+@keyframes bottomShade {
+  0% { opacity: 0.22; }
+  100% { opacity: 0.06; }
 }
 
 @media (prefers-reduced-motion: reduce) {
