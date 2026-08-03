@@ -13,7 +13,7 @@ The internal sweep takes half of the natural interval for each position:
 - Minutes ones: 30 seconds
 - Minutes tens: 5 minutes
 - Hours ones: 30 minutes
-- Hours tens: half of the current ten-hour block
+- Hours tens: half of the time until that position changes again
 
 Inactive counters continue changing quietly in the field. A full-width green synchronisation scan marks each new minute.
 
