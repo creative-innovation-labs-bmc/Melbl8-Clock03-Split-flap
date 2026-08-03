@@ -31,3 +31,10 @@ The time is formed from hundreds of small independent numerical counters. The si
 ## Font
 
 The hosted subfolder references the existing `MP-B.ttf` file one directory above. For a standalone repository, copy `MP-B.ttf` into the repository root and change the font URL in `style.css` from `../MP-B.ttf` to `./MP-B.ttf`.
+
+## Digit geometry
+
+- All seven-segment strokes are exactly three counter cells thick
+- Two empty counter-cell spaces are used between the two digits in each HH, MM and SS pair
+- Top and bottom whitespace around the time field is balanced
+- The minute progress line spans the full 3840-pixel screen width
