@@ -4,7 +4,7 @@ A lightweight real-time clock designed for the 3840 × 804 gallery screen.
 
 ## Concept
 
-The time is formed from hundreds of small independent numerical counters. Inactive counters continue to change quietly in the field. Only a large digit that changes is reconfigured, while a full-width green synchronisation scan marks each new minute.
+The time is formed from hundreds of small independent numerical counters. The six main numerals use expanded block masks for heavier, long-distance legibility, while the labels retain the MP-B brand font. Inactive counters continue to change quietly in the field. Only a large digit that changes is reconfigured, while a full-width green synchronisation scan marks each new minute.
 
 ## Production constraints
 
