@@ -4,7 +4,9 @@ A lightweight real-time clock designed for the 3840 × 804 gallery screen.
 
 ## Concept
 
-The time is formed from hundreds of small independent numerical counters. Each large numeral is a refined 9 × 13 matrix shape rather than a seven-segment digit. At a clock change, the large silhouette switches immediately. The tiny numbers inside that silhouette then resolve to the new digit from left to right and top to bottom.
+The time is formed from hundreds of small independent numerical counters. Each large numeral is now drawn on a 15 × 17 matrix traced from the supplied Meta Serif Bold numeral reference. The larger matrix preserves the reference's bold bowls, open `4`, slab terminals and shared baseline without turning the clock into a conventional text display.
+
+At a clock change, the large silhouette switches immediately. The tiny numbers inside that silhouette then resolve to the new digit from left to right and top to bottom.
 
 The internal sweep takes half of the natural interval for each position:
 
@@ -23,7 +25,7 @@ Inactive counters continue changing quietly in the field. A full-width green syn
 - Default render buffer: 1920 × 402, CSS-scaled to the native display
 - Pure Canvas 2D and vanilla JavaScript
 - 18 fps cap
-- No external libraries, APIs or network dependencies
+- No external libraries, APIs or CDN dependencies
 - Australia/Melbourne time zone
 - Resynchronises from the system clock on every frame
 - Pauses rendering when the browser tab is hidden
@@ -41,14 +43,15 @@ Inactive counters continue changing quietly in the field. A full-width green syn
 
 ## Font
 
-The hosted subfolder references the existing `MP-B.ttf` file one directory above. For a standalone repository, copy `MP-B.ttf` into the repository root and change the font URL in `style.css` from `../MP-B.ttf` to `./MP-B.ttf`.
+The hosted subfolder references the existing `MP-B.ttf` file one directory above for the small counters and supporting typography. The large numeral silhouettes are custom matrix drawings based on the supplied Meta Serif Bold reference image.
 
 ## Digit geometry
 
-- Every numeral follows the same 9 × 13 number grid
-- Refined serif-like terminals replace the blocky seven-segment treatment
-- The number `4` has a clear diagonal, crossbar and consistent right stem
-- Colon dots use the same two-cell matrix thickness as the numeral stems
-- Two grid spaces are used between the two digits in each HH, MM and SS pair
+- Every numeral uses the same 15 × 17 matrix and shared baseline
+- The masks were traced from the supplied 0–9 reference rather than inferred from a seven-segment system
+- Bold bowls and stems occupy roughly the same visual proportion as the reference
+- The `4` uses a continuous diagonal, heavy crossbar and right stem
+- Colon dots use a 3 × 3 counter matrix to match the heavier numeral weight
+- Two grid spaces separate the two digits in each HH, MM and SS pair
 - Top and bottom whitespace around the time field is balanced
 - The minute progress line spans the full 3840-pixel screen width
