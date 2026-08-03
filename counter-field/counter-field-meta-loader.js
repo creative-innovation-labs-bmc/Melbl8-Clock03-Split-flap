@@ -103,6 +103,13 @@
 
     source = replaceOnce(
       source,
+      /let atlas=null;let lastFrameAt=0;let lastClockString='';let lastAnnouncedSecond=-1;/,
+      "let atlas=null;let lastFrameAt=0;let lastClockString='';let lastAnnouncedSecond=-1;let lastColonSecond=-1;",
+      'colon second state'
+    );
+
+    source = replaceOnce(
+      source,
       /jitter:\(random\(\)-0\.5\)\*0\.8/g,
       'jitter:(random()-0.5)*0.65',
       'cell jitter'
@@ -113,6 +120,13 @@
       /\[3,8\]\.forEach\(\(startRow\)=>\{for\(let rowOffset=0;rowOffset<2;rowOffset\+\+\)\{for\(let colOffset=0;colOffset<2;colOffset\+\+\)\{/,
       '[4,10].forEach((startRow)=>{for(let rowOffset=0;rowOffset<3;rowOffset++){for(let colOffset=0;colOffset<3;colOffset++){',
       'colon matrix'
+    );
+
+    source = replaceOnce(
+      source,
+      /cells\.push\(\{x:item\.x\+colOffset\*CELL_X,y:CLOCK_Y\+\(startRow\+rowOffset\)\*CELL_Y,phase:\(startRow\+rowOffset\+colOffset\)\*0\.7\}\);/,
+      'cells.push({x:item.x+colOffset*CELL_X,y:CLOCK_Y+(startRow+rowOffset)*CELL_Y,rowOffset,colOffset,value:0,targetValue:0,settleAt:-Infinity,phase:(startRow+rowOffset+colOffset)*0.7});',
+      'colon cell state'
     );
 
     source = replaceOnce(
@@ -129,18 +143,36 @@
       'counter font size'
     );
 
+    source = replaceOnce(
+      source,
+      /cell\.nextAmbientChange=nowPerf\+560\+\(cell\.row\*47\+cell\.col\*83\)%720;\}\}for\(const cell of backgroundCells\)\{/,
+      'cell.nextAmbientChange=nowPerf+560+(cell.row*47+cell.col*83)%720;}}if(state.second!==lastColonSecond){const targetValue=state.second%10;const firstColonFrame=lastColonSecond<0;lastColonSecond=state.second;const transitionStart=state.logicalMs-state.millisecond;for(const cell of colonCells){if(firstColonFrame)cell.value=(targetValue+9)%10;cell.targetValue=targetValue;const rank=cell.rowOffset*3+cell.colOffset;cell.settleAt=noMotion?transitionStart:transitionStart+rank*(520/8);}}for(const cell of colonCells){if(state.logicalMs>=cell.settleAt)cell.value=cell.targetValue;}for(const cell of backgroundCells){',
+      'colon number transition'
+    );
+
     source = source.replace(',0,0.08,0.86);continue;', ',0,0.075,0.78);continue;');
     source = source.replace(
       'const alpha=settled?0.96:0.82;const size=settled?1.03:0.98;',
       'const alpha=settled?0.97:0.82;const size=settled?0.98:0.94;'
     );
+
+    source = replaceOnce(
+      source,
+      /const colonPulse=noMotion\?1:0\.94\+Math\.sin\(nowPerf\*0\.008\)\*0\.04;for\(const cell of colonCells\)\{drawAtlasDigit\(0,cell\.x,cell\.y,2,0\.88,colonPulse\);\}/,
+      'const colonPulse=noMotion?1:0.96+Math.sin(nowPerf*0.008)*0.025;for(const cell of colonCells){const settledAge=state.logicalMs-cell.settleAt;const colonSize=settledAge>=0&&settledAge<140?1.04:0.94*colonPulse;drawAtlasDigit(cell.value,cell.x,cell.y,2,0.9,colonSize);}',
+      'animated colon rendering'
+    );
+
     source = source.replace(
-      'const colonPulse=noMotion?1:0.94+Math.sin(nowPerf*0.008)*0.04;for(const cell of colonCells){drawAtlasDigit(0,cell.x,cell.y,2,0.88,colonPulse);}',
-      'const colonPulse=noMotion?1:0.96+Math.sin(nowPerf*0.008)*0.025;for(const cell of colonCells){drawAtlasDigit(0,cell.x,cell.y,2,0.9,0.94*colonPulse);}'
+      'digitHeight:DIGIT_H};',
+      'digitHeight:DIGIT_H,colonValues:colonCells.map((cell)=>cell.value)};'
     );
 
     if (!source.includes('const DIGIT_COLS=15;const DIGIT_ROWS=17;')) {
       throw new Error('Counter Field transform validation failed');
+    }
+    if (!source.includes('lastColonSecond=-1') || !source.includes('rank*(520/8)')) {
+      throw new Error('Counter Field colon animation validation failed');
     }
 
     const blob = new Blob([source], { type: 'text/javascript' });
