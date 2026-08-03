@@ -9,15 +9,15 @@
   const FPS = 18;
   const FRAME_MS = 1000 / FPS;
   const DIGIT_COLS = 9;
-  const DIGIT_ROWS = 13;
-  const DIGIT_STROKE_RADIUS = 1;
+  const DIGIT_ROWS = 17;
+  const STROKE_CELLS = 3;
   const CELL_X = 21;
-  const CELL_Y = 22;
+  const CELL_Y = 17;
   const DIGIT_W = (DIGIT_COLS - 1) * CELL_X;
   const DIGIT_H = (DIGIT_ROWS - 1) * CELL_Y;
-  const DIGIT_GAP = 31;
+  const DIGIT_GAP = CELL_X * 3;
   const PAIR_GAP = 62;
-  const CLOCK_Y = 76;
+  const CLOCK_Y = 63;
 
   const COLOURS = {
     bg: '#1C1B1C',
@@ -27,17 +27,17 @@
     white: '#FFFFFF'
   };
 
-  const FONT_5X7 = {
-    '0': ['11111','10001','10001','10001','10001','10001','11111'],
-    '1': ['00100','01100','00100','00100','00100','00100','01110'],
-    '2': ['11111','00001','00001','11111','10000','10000','11111'],
-    '3': ['11111','00001','00001','01111','00001','00001','11111'],
-    '4': ['10001','10001','10001','11111','00001','00001','00001'],
-    '5': ['11111','10000','10000','11111','00001','00001','11111'],
-    '6': ['11111','10000','10000','11111','10001','10001','11111'],
-    '7': ['11111','00001','00010','00100','01000','01000','01000'],
-    '8': ['11111','10001','10001','11111','10001','10001','11111'],
-    '9': ['11111','10001','10001','11111','00001','00001','11111']
+  const DIGIT_SEGMENTS = {
+    '0': 'ABCDEF',
+    '1': 'BC',
+    '2': 'ABDEG',
+    '3': 'ABCDG',
+    '4': 'BCFG',
+    '5': 'ACDFG',
+    '6': 'ACDEFG',
+    '7': 'ABC',
+    '8': 'ABCDEFG',
+    '9': 'ABCDFG'
   };
 
   const params = new URLSearchParams(window.location.search);
@@ -256,26 +256,38 @@
       clock,
       second: Number(values.second),
       minute: Number(values.minute),
+      minuteProgress: (Number(values.second) + (fixedTime ? 0 : date.getMilliseconds() / 1000)) / 60,
       label: dayFormatter.format(date).toUpperCase().replace(',', '')
     };
   }
 
-  function baseMaskForDigit(digit, col, row) {
-    const pattern = FONT_5X7[digit] || FONT_5X7['0'];
-    const sourceCol = Math.min(4, Math.floor(col * 5 / DIGIT_COLS));
-    const sourceRow = Math.min(6, Math.floor(row * 7 / DIGIT_ROWS));
-    return pattern[sourceRow][sourceCol] === '1';
+  function segmentMask(segment, col, row) {
+    const left = col < STROKE_CELLS;
+    const right = col >= DIGIT_COLS - STROKE_CELLS;
+    const top = row < STROKE_CELLS;
+    const middle = row >= 7 && row <= 9;
+    const bottom = row >= DIGIT_ROWS - STROKE_CELLS;
+    const upperJoin = row >= STROKE_CELLS && row <= 8;
+    const lowerJoin = row >= 8 && row < DIGIT_ROWS - STROKE_CELLS;
+
+    switch (segment) {
+      case 'A': return top;
+      case 'B': return right && upperJoin;
+      case 'C': return right && lowerJoin;
+      case 'D': return bottom;
+      case 'E': return left && lowerJoin;
+      case 'F': return left && upperJoin;
+      case 'G': return middle;
+      default: return false;
+    }
   }
 
   function maskForDigit(digit, col, row) {
-    for (let yOffset = -DIGIT_STROKE_RADIUS; yOffset <= DIGIT_STROKE_RADIUS; yOffset++) {
-      for (let xOffset = -DIGIT_STROKE_RADIUS; xOffset <= DIGIT_STROKE_RADIUS; xOffset++) {
-        if (Math.abs(xOffset) + Math.abs(yOffset) > DIGIT_STROKE_RADIUS) continue;
-        const sampleCol = col + xOffset;
-        const sampleRow = row + yOffset;
-        if (sampleCol < 0 || sampleCol >= DIGIT_COLS || sampleRow < 0 || sampleRow >= DIGIT_ROWS) continue;
-        if (baseMaskForDigit(digit, sampleCol, sampleRow)) return true;
-      }
+    // Keep 1 centred so all six digit cells feel optically balanced.
+    if (digit === '1') return col >= 3 && col <= 5;
+    const segments = DIGIT_SEGMENTS[digit] || DIGIT_SEGMENTS['0'];
+    for (const segment of segments) {
+      if (segmentMask(segment, col, row)) return true;
     }
     return false;
   }
@@ -382,7 +394,7 @@
       let activeAlpha = cell.active ? 0.98 : 0.075;
       let style = cell.active ? 1 : 0;
       let value = cell.active ? Number(digit) : cell.value;
-      let scale = cell.active ? 1.14 : 0.90;
+      let scale = cell.active ? 1.10 : 0.90;
       let y = cell.y;
 
       if (!noMotion && transitionAge >= 0 && transitionAge < 430) {
@@ -413,14 +425,14 @@
     const bright = second % 2 === 0;
     colonItems.forEach((item, index) => {
       const centreX = item.x + item.width / 2;
-      const rows = [4, 9];
+      const rows = [5, 11];
       rows.forEach((row, dot) => {
         const value = (second + index + dot) % 10;
         const alpha = bright ? 1 : 0.20;
         const pulse = noMotion ? 1 : 1 + Math.sin(now * 0.006 + dot * 1.4) * 0.04;
-        for (const xOffset of [-7, 7]) {
-          for (const yOffset of [-5, 5]) {
-            drawAtlasDigit(value, centreX + xOffset, CLOCK_Y + row * CELL_Y + yOffset, 2, alpha, 0.82 * pulse);
+        for (const xOffset of [-9, 0, 9]) {
+          for (const yOffset of [-9, 0, 9]) {
+            drawAtlasDigit(value, centreX + xOffset, CLOCK_Y + row * CELL_Y + yOffset, 2, alpha, 0.58 * pulse);
           }
         }
       });
@@ -435,13 +447,12 @@
     ctx.textAlign = 'left';
     ctx.fillText('3840 × 804  /  CANVAS 2D  /  SHIELD MODE', 73, 378);
 
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(137,201,37,.78)';
-    const secondBarW = 360;
-    const startX = LOGICAL_W - 73 - secondBarW;
-    ctx.fillRect(startX, 375, secondBarW, 1);
+    const progressY = LOGICAL_H - 6;
+    ctx.fillStyle = 'rgba(137,201,37,.26)';
+    ctx.fillRect(0, LOGICAL_H - 2, LOGICAL_W, 2);
     ctx.globalAlpha = 0.95;
-    ctx.fillRect(startX, 372, secondBarW * ((state.second + 1) / 60), 7);
+    ctx.fillStyle = COLOURS.green;
+    ctx.fillRect(0, progressY, LOGICAL_W * state.minuteProgress, 6);
     ctx.globalAlpha = 1;
   }
 
@@ -486,7 +497,7 @@
   });
 
   window.__counterField = {
-    version: '2026.08.03-b',
+    version: '2026.08.03-c',
     stage: { width: STAGE_W, height: STAGE_H },
     logicalCanvas: { width: LOGICAL_W, height: LOGICAL_H, renderScale },
     fpsCap: FPS,
@@ -495,6 +506,10 @@
       fontReady,
       backgroundCells: backgroundCells.length,
       digitCells: digitCells.length,
+      strokeCells: STROKE_CELLS,
+      emptyPairSpacingCells: 2,
+      digitGap: DIGIT_GAP,
+      clockY: CLOCK_Y,
       canvasWidth: canvas.width,
       canvasHeight: canvas.height,
       clock: lastClockString,
@@ -503,6 +518,9 @@
       stageTop: stage.style.top,
       lastChangedDigitIndexes: [...lastChangedDigitIndexes]
     }),
+    getDigitMask: (digit) => Array.from({ length: DIGIT_ROWS }, (_, row) =>
+      Array.from({ length: DIGIT_COLS }, (_, col) => maskForDigit(String(digit), col, row) ? 1 : 0)
+    ),
     triggerMinutePulse: () => { minutePulseStart = performance.now(); }
   };
 
