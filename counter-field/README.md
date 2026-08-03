@@ -4,7 +4,18 @@ A lightweight real-time clock designed for the 3840 × 804 gallery screen.
 
 ## Concept
 
-The time is formed from hundreds of small independent numerical counters. The six main numerals use expanded block masks for heavier, long-distance legibility, while the labels retain the MP-B brand font. Inactive counters continue to change quietly in the field. Only a large digit that changes is reconfigured, while a full-width green synchronisation scan marks each new minute.
+The time is formed from hundreds of small independent numerical counters. Each large numeral is a refined 9 × 13 matrix shape rather than a seven-segment digit. At a clock change, the large silhouette switches immediately. The tiny numbers inside that silhouette then resolve to the new digit from left to right and top to bottom.
+
+The internal sweep takes half of the natural interval for each position:
+
+- Seconds ones: 0.5 seconds
+- Seconds tens: 5 seconds
+- Minutes ones: 30 seconds
+- Minutes tens: 5 minutes
+- Hours ones: 30 minutes
+- Hours tens: half of the current ten-hour block
+
+Inactive counters continue changing quietly in the field. A full-width green synchronisation scan marks each new minute.
 
 ## Production constraints
 
@@ -34,7 +45,10 @@ The hosted subfolder references the existing `MP-B.ttf` file one directory above
 
 ## Digit geometry
 
-- All seven-segment strokes are exactly three counter cells thick
-- Two empty counter-cell spaces are used between the two digits in each HH, MM and SS pair
+- Every numeral follows the same 9 × 13 number grid
+- Refined serif-like terminals replace the blocky seven-segment treatment
+- The number `4` has a clear diagonal, crossbar and consistent right stem
+- Colon dots use the same two-cell matrix thickness as the numeral stems
+- Two grid spaces are used between the two digits in each HH, MM and SS pair
 - Top and bottom whitespace around the time field is balanced
 - The minute progress line spans the full 3840-pixel screen width
