@@ -1,0 +1,91 @@
+:root {
+  --stage-w: 3840px;
+  --stage-h: 804px;
+  --bg: #1C1B1C;
+  --aurecon-grey: #373A36;
+  --aurecon-grey-2: #4E5859;
+  --green: #89C925;
+  --white: #FFFFFF;
+}
+
+@font-face {
+  font-family: "MP-B";
+  src: url("../MP-B.ttf?v=20260803a") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--white);
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+body {
+  font-family: "MP-B", Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+#viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+#stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--stage-w);
+  height: var(--stage-h);
+  overflow: hidden;
+  background: var(--bg);
+  transform-origin: 0 0;
+  contain: strict;
+}
+
+#field {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+#status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+html.preview body::after {
+  content: "3840 × 804  ·  ROTATE PHONE FOR A LARGER VIEW";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  text-align: center;
+  color: rgba(255,255,255,.48);
+  font: 11px/1.3 Arial, Helvetica, sans-serif;
+  letter-spacing: .12em;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #field { image-rendering: auto; }
+}
